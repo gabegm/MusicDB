@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS fact_listen;
+-- DROP TABLE IF EXISTS fact_listen;
 
 CREATE TABLE IF NOT EXISTS fact_listen (
     id integer primary key autoincrement
@@ -27,4 +27,4 @@ LEFT JOIN dim_user AS du ON (l.user_name = du.user_name)
 LEFT JOIN dim_artist AS da ON (l.artist_name = da.artist_name)
 LEFT JOIN dim_track AS dt ON (l.track_name = dt.track_name AND l.release_name = dt.release_name AND da.id = dt.artist_id);
 
-CREATE INDEX idx_user_id ON fact_listen (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_id ON fact_listen (user_id);

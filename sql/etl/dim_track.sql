@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS dim_track;
+-- DROP TABLE IF EXISTS dim_track;
 
 CREATE TABLE IF NOT EXISTS dim_track (id integer primary key autoincrement, track_name TEXT, release_name TEXT,artist_id INTEGER);
 

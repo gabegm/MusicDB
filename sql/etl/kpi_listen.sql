@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS kpi_listen;
+-- DROP TABLE IF EXISTS kpi_listen;
 
 CREATE TABLE IF NOT EXISTS kpi_listen (
     id integer primary key autoincrement

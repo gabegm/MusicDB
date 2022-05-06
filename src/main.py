@@ -6,6 +6,18 @@ from sqlalchemy import text
 import os
 import time
 from numpy import NaN
+from pathlib import Path
+import logging
+import sqlparse
+
+def execute_sql(file_path:str, ):
+    with open(file_path) as sql_file:
+         for statement in sqlparse.split(sqlparse.format(sql_file, strip_comments=True)):
+            if len(statement.strip()) > 0:
+                with e.connect() as conn:
+                    conn.execute(text(statement))
+                logging.info(statement)
+    return True
 
 def main(df_listens: pd.DataFrame, e: engine.base.Engine):
     df_tracks = pd.json_normalize(df_listens["track_metadata"])
@@ -29,24 +41,37 @@ def main(df_listens: pd.DataFrame, e: engine.base.Engine):
     # is this correct?
     df = df.fillna(NaN)
 
+    sql_etl = [
+        "sql/etl/listens.sql",
+        "sql/etl/dim_artist.sql",
+        "sql/etl/dim_track.sql",
+        "sql/etl/dim_user.sql",
+        "sql/etl/fact_listen.sql",
+        "sql/etl/kpi_listen.sql",
+        "sql/etl/kpi_user.sql"
+    ]
+
+    [execute_sql(f) for f in sql_etl]
+
+    logging.info("tables created")
+
     df.to_sql("listens", con=e, if_exists="append", index=False)
 
 if __name__ == "__main__":
     # Connects to an in­file database in the current working directory, or creates one, if it doesn't exist:
     e = create_engine('sqlite:///data/processed/spotify.db', echo=False)
-    file_path = "data/raw/dataset.txt"
+    #file_path = "data/raw/dataset.txt"
 
-    # fix ufffd decode error for user_name
-    df_listens = pd.read_json(file_path, lines=True, encoding_errors="ignore")
+    #main(df_listens, e)
 
-    main(df_listens, e)
-
-    watch_dir = "data/raw/"
+    watch_dir = "data/interim/"
     contents = os.listdir(watch_dir)
     count = len(watch_dir)
     dirmtime = os.stat(watch_dir).st_mtime
 
     while True:
+        logging.info("waiting for files")
+
         newmtime = os.stat(watch_dir).st_mtime
 
         if newmtime != dirmtime:
@@ -55,23 +80,21 @@ if __name__ == "__main__":
             added = set(new_contents).difference(contents)
 
             if added:
-                print(f"Files added: {' '.join(added)}")
+                logging.info(f"Files added: {' '.join(added)}")
 
-            removed = set(contents).difference(new_contents)
+                for f in added:
+                    # fix ufffd decode error for user_name
+                    df_listens = pd.read_json(watch_dir+f, lines=True, encoding_errors="ignore")
 
-            if removed:
-                print(f"Files removed: {' '.join(removed)}")
+                    df_listens["last_load"] = newmtime
+
+                    main(df_listens, e)
+
+                removed = set(contents).difference(new_contents)
+
+                if removed:
+                    logging.info(f"Files removed: {' '.join(removed)}")
 
             contents = new_contents
 
         time.sleep(5)
-
-
-    """
-    with e.connect() as conn:
-        conn.execute(text("CREATE TABLE IF NOT EXISTS dim_user;"))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS dim_track"))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS dim_artist"))
-        conn.execute(text("CREATE TABLE IF NOT EXISTS fact_listen"))
-    """
-

@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS kpi_user;
+-- DROP TABLE IF EXISTS kpi_user;
 
 CREATE TABLE IF NOT EXISTS kpi_user (
     id integer primary key autoincrement
@@ -17,4 +17,4 @@ GROUP BY
     user_id
     , listened_at;
 
-CREATE UNIQUE INDEX idx_user_id ON kpi_listen (user_id);
+-- CREATE UNIQUE INDEX IF NOT EXISTS idx_user_id ON kpi_user (user_id);
