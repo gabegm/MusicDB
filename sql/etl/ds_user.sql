@@ -33,6 +33,23 @@ WITH favourite_artist AS (
             , track_id
     )
 )
+, daily_peak AS (
+    SELECT
+        user_id
+        , max(n_listens) AS peak_day
+    FROM (
+        SELECT
+            date(listened_at) AS listened_at
+            , user_id
+            , count(*) AS n_listens
+        FROM fact_listen
+        GROUP BY
+            date(listened_at)
+            , user_id
+    )
+    GROUP BY
+        user_id
+)
 SELECT
     du.user_name
     , count(*) AS n_listens
@@ -43,10 +60,11 @@ SELECT
     , count(*) - count(distinct(fl.track_id)) AS replays
     , da.artist_name AS favourite_artist
     , dt.track_name AS favourite_track
-    , MAX(count(*)) OVER (PARTITION BY fl.user_id, DATE(listened_at)) AS peak_day
+    , daily_peak.peak_day
 FROM fact_listen as fl
 INNER JOIN favourite_artist AS fa ON (fl.user_id = fa.user_id and fa.rnk = 1)
 INNER JOIN favourite_track AS ft ON (fl.user_id = ft.user_id and ft.rnk = 1)
+INNER JOIN daily_peak ON (fl.user_id = daily_peak.user_id)
 LEFT JOIN dim_user AS du ON (fl.user_id = du.id)
 LEFT JOIN dim_artist AS da ON (fa.artist_id = da.id)
 LEFT JOIN dim_track AS dt ON (ft.track_id = dt.id)
