@@ -1,3 +1,4 @@
+-- dum_user
 SELECT
     *
 FROM (
@@ -9,6 +10,7 @@ FROM (
         user_name
 ) WHERE n > 1;
 
+-- dim_artist
 SELECT
     *
 FROM (
@@ -20,6 +22,7 @@ FROM (
         artist_name
 ) WHERE n > 1;
 
+-- dim_track
 SELECT
     *
 FROM (
