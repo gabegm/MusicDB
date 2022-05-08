@@ -52,7 +52,8 @@ def main(df_listens: pd.DataFrame, e: engine.base.Engine):
         "sql/etl/fact_listen.sql",
         "sql/etl/kpi_listen.sql",
         "sql/etl/kpi_user.sql",
-        "sql/etl/kpi_track.sql"
+        "sql/etl/kpi_track.sql",
+        "sql/etl/ds_user.sql"
     ]
 
     [execute_sql(f) for f in sql_etl]
@@ -67,7 +68,7 @@ if __name__ == "__main__":
     # Create handlers
     c_handler = logging.StreamHandler()
     f_handler = logging.FileHandler('file.log')
-    c_handler.setLevel(logging.INFO) #warning
+    c_handler.setLevel(logging.WARNING)
     f_handler.setLevel(logging.ERROR) #error
 
     # Create formatters and add it to handlers

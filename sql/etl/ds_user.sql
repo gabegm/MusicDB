@@ -1,3 +1,4 @@
+CREATE TABLE ds_user AS
 WITH favourite_artist AS (
     SELECT
         user_id
